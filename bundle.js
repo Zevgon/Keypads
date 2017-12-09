@@ -18323,11 +18323,6 @@ function shuffle(array) {
   return array;
 }
 
-// display: flex;
-//     justify-content: space-between;
-//     width: 344px;
-//     flex-wrap: wrap;
-
 var pictureWrapperStyle = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -18345,6 +18340,17 @@ var highlighted = {
   border: '2px solid red'
 };
 
+var columnOptionStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+};
+
+var colOptionButton = {
+  outline: 'none'
+};
+
 var App = function (_Component) {
   _inherits(App, _Component);
 
@@ -18353,20 +18359,32 @@ var App = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
+    var activeColumnIds = new Set();
+    columns.forEach(function (_, idx) {
+      return activeColumnIds.add(idx);
+    });
     _this.state = {
       running: false,
       clickedPictures: new Set(),
-      lost: false
+      lost: false,
+      columns: columns.map(function (column) {
+        return [].concat(_toConsumableArray(column));
+      }),
+      activeColumnIds: activeColumnIds
     };
     _this.start = _this.start.bind(_this);
     _this.handleClick = _this.handleClick.bind(_this);
     _this.getButtonStyle = _this.getButtonStyle.bind(_this);
+    _this.getOptionBtnStyle = _this.getOptionBtnStyle.bind(_this);
+    _this.toggleColOption = _this.toggleColOption.bind(_this);
     return _this;
   }
 
   _createClass(App, [{
     key: 'getPictures',
     value: function getPictures() {
+      var columns = this.state.columns;
+
       var colIdx = Math.floor(Math.random() * columns.length);
       var column = columns[colIdx];
       var numLeft = 4;
@@ -18387,6 +18405,23 @@ var App = function (_Component) {
         ret = Object.assign({}, ret, highlighted);
       }
       return ret;
+    }
+  }, {
+    key: 'getOptionBtnStyle',
+    value: function getOptionBtnStyle(col) {
+      var ret = colOptionButton;
+      if (this.state.activeColumnIds.has(col)) {
+        ret = Object.assign({}, ret, highlighted);
+      }
+      return ret;
+    }
+  }, {
+    key: 'getNewCols',
+    value: function getNewCols(colIds) {
+      return columns.filter(function (col, idx) {
+        if (colIds.has(idx)) return col;
+        return null;
+      });
     }
   }, {
     key: 'start',
@@ -18434,6 +18469,21 @@ var App = function (_Component) {
       }
     }
   }, {
+    key: 'toggleColOption',
+    value: function toggleColOption(col) {
+      var curCols = this.state.activeColumnIds;
+      if (curCols.has(col)) {
+        curCols.delete(col);
+      } else {
+        curCols.add(col);
+      }
+      var newCols = this.getNewCols(curCols);
+      this.setState({
+        columns: newCols,
+        activeColumnIds: curCols
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
@@ -18458,9 +18508,33 @@ var App = function (_Component) {
           );
         }),
         !this.state.running && _react2.default.createElement(
-          'button',
-          { onClick: this.start },
-          'Start'
+          'div',
+          null,
+          _react2.default.createElement(
+            'button',
+            { onClick: this.start },
+            'Start'
+          ),
+          _react2.default.createElement(
+            'div',
+            { style: columnOptionStyle },
+            columns.map(function (_, idx) {
+              return idx;
+            }).map(function (col) {
+              return _react2.default.createElement(
+                'button',
+                {
+                  key: col + '-1',
+                  style: _this2.getOptionBtnStyle(col),
+                  onClick: function onClick() {
+                    return _this2.toggleColOption(col);
+                  }
+                },
+                'Column ',
+                col
+              );
+            })
+          )
         ),
         this.state.lost && _react2.default.createElement(
           'div',

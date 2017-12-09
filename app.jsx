@@ -85,11 +85,6 @@ function shuffle(array) {
   return array;
 }
 
-// display: flex;
-//     justify-content: space-between;
-//     width: 344px;
-//     flex-wrap: wrap;
-
 const pictureWrapperStyle = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -107,20 +102,38 @@ const highlighted = {
   border: '2px solid red',
 };
 
+const columnOptionStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+};
+
+const colOptionButton = {
+  outline: 'none',
+};
+
 export default class App extends Component {
   constructor() {
     super();
+    const activeColumnIds = new Set();
+    columns.forEach((_, idx) => activeColumnIds.add(idx));
     this.state = {
       running: false,
       clickedPictures: new Set(),
       lost: false,
+      columns: columns.map(column => [...column]),
+      activeColumnIds,
     };
     this.start = this.start.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.getButtonStyle = this.getButtonStyle.bind(this);
+    this.getOptionBtnStyle = this.getOptionBtnStyle.bind(this);
+    this.toggleColOption = this.toggleColOption.bind(this);
   }
 
   getPictures() {
+    const { columns } = this.state;
     const colIdx = Math.floor(Math.random() * columns.length);
     const column = columns[colIdx];
     let numLeft = 4;
@@ -140,6 +153,21 @@ export default class App extends Component {
       ret = Object.assign({}, ret, highlighted);
     }
     return ret;
+  }
+
+  getOptionBtnStyle(col) {
+    let ret = colOptionButton;
+    if (this.state.activeColumnIds.has(col)) {
+      ret = Object.assign({}, ret, highlighted);
+    }
+    return ret;
+  }
+
+  getNewCols(colIds) {
+    return columns.filter((col, idx) => {
+      if (colIds.has(idx)) return col;
+      return null;
+    });
   }
 
   start() {
@@ -180,6 +208,20 @@ export default class App extends Component {
     }
   }
 
+  toggleColOption(col) {
+    const curCols = this.state.activeColumnIds;
+    if (curCols.has(col)) {
+      curCols.delete(col);
+    } else {
+      curCols.add(col);
+    }
+    const newCols = this.getNewCols(curCols);
+    this.setState({
+      columns: newCols,
+      activeColumnIds: curCols,
+    });
+  }
+
   render() {
     return (
       <div style={pictureWrapperStyle}>
@@ -196,7 +238,19 @@ export default class App extends Component {
           </button>
         ))}
         {!this.state.running &&
-          <button onClick={this.start}>Start</button>
+          <div>
+            <button onClick={this.start}>Start</button>
+            <div style={columnOptionStyle}>
+              {columns.map((_, idx) => idx).map(col => (
+                <button
+                  key={`${col}-1`}
+                  style={this.getOptionBtnStyle(col)}
+                  onClick={() => this.toggleColOption(col)}
+                >Column {col}
+                </button>
+              ))}
+            </div>
+          </div>
         }
         {this.state.lost &&
           <div>Oops, you lost. Dumbo.</div>
