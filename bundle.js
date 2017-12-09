@@ -18370,13 +18370,16 @@ var App = function (_Component) {
       columns: columns.map(function (column) {
         return [].concat(_toConsumableArray(column));
       }),
-      activeColumnIds: activeColumnIds
+      activeColumnIds: activeColumnIds,
+      showAnswer: false
     };
     _this.start = _this.start.bind(_this);
-    _this.handleClick = _this.handleClick.bind(_this);
+    _this.handleGuess = _this.handleGuess.bind(_this);
     _this.getButtonStyle = _this.getButtonStyle.bind(_this);
     _this.getOptionBtnStyle = _this.getOptionBtnStyle.bind(_this);
     _this.toggleColOption = _this.toggleColOption.bind(_this);
+    _this.toggleAnswer = _this.toggleAnswer.bind(_this);
+    _this.startEventListeners();
     return _this;
   }
 
@@ -18424,6 +18427,19 @@ var App = function (_Component) {
       });
     }
   }, {
+    key: 'startEventListeners',
+    value: function startEventListeners() {
+      var _this2 = this;
+
+      document.addEventListener('keydown', function (e) {
+        if (e.which >= 49 && e.which <= 52) {
+          _this2.handleGuess(null, _this2.state.pictures[e.which - 49]);
+        } else if (e.which === 32 && !_this2.state.running) {
+          _this2.start();
+        }
+      });
+    }
+  }, {
     key: 'start',
     value: function start() {
       var _getPictures = this.getPictures(),
@@ -18450,9 +18466,9 @@ var App = function (_Component) {
       });
     }
   }, {
-    key: 'handleClick',
-    value: function handleClick(e, picture) {
-      e.preventDefault();
+    key: 'handleGuess',
+    value: function handleGuess(e, picture) {
+      if (e) e.preventDefault();
       if (!this.state.running) return;
       if (picture !== this.state.answer[this.state.clickedPictures.size]) {
         this.setState({
@@ -18484,9 +18500,16 @@ var App = function (_Component) {
       });
     }
   }, {
+    key: 'toggleAnswer',
+    value: function toggleAnswer() {
+      this.setState({
+        showAnswer: !this.state.showAnswer
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       return _react2.default.createElement(
         'div',
@@ -18496,10 +18519,10 @@ var App = function (_Component) {
             'button',
             {
               onClick: function onClick(e) {
-                return _this2.handleClick(e, picture);
+                return _this3.handleGuess(e, picture);
               },
               key: picture,
-              style: _this2.getButtonStyle(picture)
+              style: _this3.getButtonStyle(picture)
             },
             _react2.default.createElement('img', {
               alt: 'stuff',
@@ -18525,9 +18548,9 @@ var App = function (_Component) {
                 'button',
                 {
                   key: col + '-1',
-                  style: _this2.getOptionBtnStyle(col),
+                  style: _this3.getOptionBtnStyle(col),
                   onClick: function onClick() {
-                    return _this2.toggleColOption(col);
+                    return _this3.toggleColOption(col);
                   }
                 },
                 'Column ',
@@ -18545,7 +18568,17 @@ var App = function (_Component) {
           'div',
           null,
           'Yay you win!!'
-        )
+        ),
+        _react2.default.createElement(
+          'button',
+          { onClick: this.toggleAnswer },
+          this.state.showAnswer ? 'Hide table' : 'Show table'
+        ),
+        this.state.showAnswer && _react2.default.createElement('img', {
+          alt: 'answer',
+          src: './images/answer.png',
+          style: { width: '500px', height: '400px' }
+        })
       );
     }
   }]);

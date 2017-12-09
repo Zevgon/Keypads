@@ -124,12 +124,15 @@ export default class App extends Component {
       lost: false,
       columns: columns.map(column => [...column]),
       activeColumnIds,
+      showAnswer: false,
     };
     this.start = this.start.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.handleGuess = this.handleGuess.bind(this);
     this.getButtonStyle = this.getButtonStyle.bind(this);
     this.getOptionBtnStyle = this.getOptionBtnStyle.bind(this);
     this.toggleColOption = this.toggleColOption.bind(this);
+    this.toggleAnswer = this.toggleAnswer.bind(this);
+    this.startEventListeners();
   }
 
   getPictures() {
@@ -170,6 +173,16 @@ export default class App extends Component {
     });
   }
 
+  startEventListeners() {
+    document.addEventListener('keydown', (e) => {
+      if (e.which >= 49 && e.which <= 52) {
+        this.handleGuess(null, this.state.pictures[e.which - 49]);
+      } else if (e.which === 32 && !this.state.running) {
+        this.start();
+      }
+    });
+  }
+
   start() {
     const [pictures, answer] = this.getPictures();
     this.setState({
@@ -190,8 +203,8 @@ export default class App extends Component {
     });
   }
 
-  handleClick(e, picture) {
-    e.preventDefault();
+  handleGuess(e, picture) {
+    if (e) e.preventDefault();
     if (!this.state.running) return;
     if (picture !== this.state.answer[this.state.clickedPictures.size]) {
       this.setState({
@@ -222,12 +235,18 @@ export default class App extends Component {
     });
   }
 
+  toggleAnswer() {
+    this.setState({
+      showAnswer: !this.state.showAnswer,
+    });
+  }
+
   render() {
     return (
       <div style={pictureWrapperStyle}>
         {this.state.running && this.state.pictures.map(picture => (
           <button
-            onClick={e => this.handleClick(e, picture)}
+            onClick={e => this.handleGuess(e, picture)}
             key={picture}
             style={this.getButtonStyle(picture)}
           >
@@ -257,6 +276,16 @@ export default class App extends Component {
         }
         {this.state.won &&
           <div>Yay you win!!</div>
+        }
+        <button onClick={this.toggleAnswer}>
+          {this.state.showAnswer ? 'Hide table' : 'Show table'}
+        </button>
+        {this.state.showAnswer &&
+          <img
+            alt="answer"
+            src="./images/answer.png"
+            style={{ width: '500px', height: '400px' }}
+          />
         }
       </div>
     );
