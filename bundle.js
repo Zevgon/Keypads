@@ -18488,7 +18488,7 @@ var App = function (_Component) {
     key: 'toggleColOption',
     value: function toggleColOption(col) {
       var curCols = this.state.activeColumnIds;
-      if (curCols.has(col)) {
+      if (curCols.has(col) && curCols.size > 1) {
         curCols.delete(col);
       } else {
         curCols.add(col);

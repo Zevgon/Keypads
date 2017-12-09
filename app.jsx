@@ -223,7 +223,7 @@ export default class App extends Component {
 
   toggleColOption(col) {
     const curCols = this.state.activeColumnIds;
-    if (curCols.has(col)) {
+    if (curCols.has(col) && curCols.size > 1) {
       curCols.delete(col);
     } else {
       curCols.add(col);
